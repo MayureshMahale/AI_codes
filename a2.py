@@ -1,3 +1,4 @@
+
 import heapq
 
 # Input grid size
@@ -10,15 +11,14 @@ goal = tuple(map(int, input("Enter goal position (row col): ").split()))
 
 # Input obstacles
 n = int(input("Enter number of obstacles: "))
-
 obstacles = set()
 
 for i in range(n):
-    obstacle = tuple(map(int, input(f"Enter obstacle {i + 1} (row col): ").split()))
+    obstacle = tuple(map(int, input(f"Enter obstacle {i+1} (row col): ").split()))
     obstacles.add(obstacle)
 
 
-# A* heuristic: Manhattan distance
+# Manhattan Distance
 def heuristic(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
@@ -32,38 +32,27 @@ moves = [
 ]
 
 
-def get_neighbors(position):
-
-    r, c = position
+# Get valid neighboring positions
+def get_neighbors(pos):
+    r, c = pos
     neighbors = []
 
     for dr, dc, direction in moves:
-
         nr = r + dr
         nc = c + dc
 
-        # Check boundary and obstacle
-        if (0 <= nr < rows and
-            0 <= nc < cols and
-            (nr, nc) not in obstacles):
-
+        if 0 <= nr < rows and 0 <= nc < cols and (nr, nc) not in obstacles:
             neighbors.append(((nr, nc), direction))
 
     return neighbors
 
 
+# A* Algorithm
 def a_star(start, goal):
-
-    # Priority queue
-    open_list = []
-
-    heapq.heappush(open_list, (0, start))
-
-    came_from = {}
-    move_from = {}
+    open_list = [(0, start)]
 
     g_cost = {start: 0}
-
+    came_from = {}
     visited = set()
 
     while open_list:
@@ -77,19 +66,19 @@ def a_star(start, goal):
 
         # Goal reached
         if current == goal:
-
             path = []
 
             while current != start:
-                path.append((current, move_from[current]))
-                current = came_from[current]
+                previous, direction = came_from[current]
+                path.append((current, direction))
+                current = previous
 
             path.append((start, "Start"))
             path.reverse()
 
-            return path, visited
+            return path
 
-        # Check possible moves
+        # Explore neighbors
         for neighbor, direction in get_neighbors(current):
 
             new_cost = g_cost[current] + 1
@@ -97,19 +86,17 @@ def a_star(start, goal):
             if neighbor not in g_cost or new_cost < g_cost[neighbor]:
 
                 g_cost[neighbor] = new_cost
-
                 f_cost = new_cost + heuristic(neighbor, goal)
 
                 heapq.heappush(open_list, (f_cost, neighbor))
 
-                came_from[neighbor] = current
-                move_from[neighbor] = direction
+                came_from[neighbor] = (current, direction)
 
-    return None, visited
+    return None
 
 
 # Run A*
-path, visited = a_star(start, goal)
+path = a_star(start, goal)
 
 
 # Display result
@@ -122,8 +109,7 @@ if path:
     print("\nAgent Navigation:")
 
     for i, (position, direction) in enumerate(path):
-
-        print(f"Step {i + 1}: Agent at {position}")
+        print(f"Step {i+1}: Agent at {position}")
 
         if direction != "Start":
             print("Move:", direction)
