@@ -1,126 +1,53 @@
+def is_safe(board, row, col, n):
 
-import heapq
+    for i in range(col):
+        if board[row][i] == 1:
+            return False
 
-# Input grid size
-rows = int(input("Enter number of rows: "))
-cols = int(input("Enter number of columns: "))
+    i, j = row - 1, col - 1
+    while i >= 0 and j >= 0:
+        if board[i][j] == 1:
+            return False
+        i -= 1
+        j -= 1
 
-# Input start and goal
-start = tuple(map(int, input("Enter start position (row col): ").split()))
-goal = tuple(map(int, input("Enter goal position (row col): ").split()))
+    i, j = row + 1, col - 1
+    while i < n and j >= 0:
+        if board[i][j] == 1:
+            return False
+        i += 1
+        j -= 1
 
-# Input obstacles
-n = int(input("Enter number of obstacles: "))
-obstacles = set()
-
-for i in range(n):
-    obstacle = tuple(map(int, input(f"Enter obstacle {i+1} (row col): ").split()))
-    obstacles.add(obstacle)
-
-
-# Manhattan Distance
-def heuristic(a, b):
-    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    return True
 
 
-# Possible movements
-moves = [
-    (-1, 0, "Up"),
-    (1, 0, "Down"),
-    (0, -1, "Left"),
-    (0, 1, "Right")
-]
+def solve(board, col, n):
+
+    if col == n:
+        return True
+
+    for row in range(n):
+
+        if is_safe(board, row, col, n):
+            board[row][col] = 1
+
+            if solve(board, col + 1, n):
+                return True
+
+            board[row][col] = 0
+
+    return False
 
 
-# Get valid neighboring positions
-def get_neighbors(pos):
-    r, c = pos
-    neighbors = []
+n = int(input("Enter number of queens: "))
 
-    for dr, dc, direction in moves:
-        nr = r + dr
-        nc = c + dc
+board = [[0] * n for _ in range(n)]
 
-        if 0 <= nr < rows and 0 <= nc < cols and (nr, nc) not in obstacles:
-            neighbors.append(((nr, nc), direction))
+if solve(board, 0, n):
+    print("\nSolution:")
 
-    return neighbors
-
-
-# A* Algorithm
-def a_star(start, goal):
-    open_list = [(0, start)]
-
-    g_cost = {start: 0}
-    came_from = {}
-    visited = set()
-
-    while open_list:
-
-        f, current = heapq.heappop(open_list)
-
-        if current in visited:
-            continue
-
-        visited.add(current)
-
-        # Goal reached
-        if current == goal:
-            path = []
-
-            while current != start:
-                previous, direction = came_from[current]
-                path.append((current, direction))
-                current = previous
-
-            path.append((start, "Start"))
-            path.reverse()
-
-            return path
-
-        # Explore neighbors
-        for neighbor, direction in get_neighbors(current):
-
-            new_cost = g_cost[current] + 1
-
-            if neighbor not in g_cost or new_cost < g_cost[neighbor]:
-
-                g_cost[neighbor] = new_cost
-                f_cost = new_cost + heuristic(neighbor, goal)
-
-                heapq.heappush(open_list, (f_cost, neighbor))
-
-                came_from[neighbor] = (current, direction)
-
-    return None
-
-
-# Run A*
-path = a_star(start, goal)
-
-
-# Display result
-print("\n-----------------------------")
-print("MODEL-BASED AGENT")
-print("-----------------------------")
-
-if path:
-
-    print("\nAgent Navigation:")
-
-    for i, (position, direction) in enumerate(path):
-        print(f"Step {i+1}: Agent at {position}")
-
-        if direction != "Start":
-            print("Move:", direction)
-
-    print("\nGoal Reached Successfully!")
-    print("Path:")
-
-    for position, direction in path:
-        print(position, end=" -> ")
-
-    print("Goal")
+    for row in board:
+        print(" ".join("Q" if cell == 1 else "." for cell in row))
 
 else:
-    print("\nNo path found!")
+    print("No solution exists.")

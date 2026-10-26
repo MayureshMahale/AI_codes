@@ -20,15 +20,17 @@ def tower_of_hanoi(n, source, auxiliary, destination, pegs):
 
     tower_of_hanoi(n - 1, auxiliary, source, destination, pegs)
 
-n = 3
+
+# Take number of disks from user
+n = int(input("Enter number of disks: "))
 
 pegs = [
-    [3, 2, 1],   # Source
-    [],           # Auxiliary
-    []            # Destination
+    list(range(n, 0, -1)),  # Source
+    [],                     # Auxiliary
+    []                      # Destination
 ]
 
-print("Initial State:")
+print("\nInitial State:")
 print_state(pegs)
 print()
 

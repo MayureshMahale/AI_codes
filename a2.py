@@ -1,21 +1,17 @@
 
 import heapq
 
-# Input grid size
 rows = int(input("Enter number of rows: "))
 cols = int(input("Enter number of columns: "))
 
-# Input start and goal
 start = tuple(map(int, input("Enter start position (row col): ").split()))
 goal = tuple(map(int, input("Enter goal position (row col): ").split()))
 
-# Input obstacles
 n = int(input("Enter number of obstacles: "))
 obstacles = set()
 
 for i in range(n):
-    obstacle = tuple(map(int, input(f"Enter obstacle {i+1} (row col): ").split()))
-    obstacles.add(obstacle)
+    obstacles.add(tuple(map(int, input(f"Enter obstacle {i+1} (row col): ").split())))
 
 
 # Manhattan Distance
@@ -24,39 +20,17 @@ def heuristic(a, b):
 
 
 # Possible movements
-moves = [
-    (-1, 0, "Up"),
-    (1, 0, "Down"),
-    (0, -1, "Left"),
-    (0, 1, "Right")
-]
+moves = [(-1, 0, "Up"), (1, 0, "Down"),
+         (0, -1, "Left"), (0, 1, "Right")]
 
 
-# Get valid neighboring positions
-def get_neighbors(pos):
-    r, c = pos
-    neighbors = []
-
-    for dr, dc, direction in moves:
-        nr = r + dr
-        nc = c + dc
-
-        if 0 <= nr < rows and 0 <= nc < cols and (nr, nc) not in obstacles:
-            neighbors.append(((nr, nc), direction))
-
-    return neighbors
-
-
-# A* Algorithm
 def a_star(start, goal):
     open_list = [(0, start)]
-
-    g_cost = {start: 0}
-    came_from = {}
+    cost = {start: 0}
+    parent = {}
     visited = set()
 
     while open_list:
-
         f, current = heapq.heappop(open_list)
 
         if current in visited:
@@ -64,33 +38,34 @@ def a_star(start, goal):
 
         visited.add(current)
 
-        # Goal reached
         if current == goal:
             path = []
-
             while current != start:
-                previous, direction = came_from[current]
+                previous, direction = parent[current]
                 path.append((current, direction))
                 current = previous
 
             path.append((start, "Start"))
             path.reverse()
-
             return path
 
-        # Explore neighbors
-        for neighbor, direction in get_neighbors(current):
+        r, c = current
 
-            new_cost = g_cost[current] + 1
+        for dr, dc, direction in moves:
+            nr, nc = r + dr, c + dc
+            neighbor = (nr, nc)
 
-            if neighbor not in g_cost or new_cost < g_cost[neighbor]:
+            if (0 <= nr < rows and 0 <= nc < cols
+                and neighbor not in obstacles and neighbor not in visited):
 
-                g_cost[neighbor] = new_cost
-                f_cost = new_cost + heuristic(neighbor, goal)
+                new_cost = cost[current] + 1
 
-                heapq.heappush(open_list, (f_cost, neighbor))
+                if neighbor not in cost or new_cost < cost[neighbor]:
+                    cost[neighbor] = new_cost
+                    f_cost = new_cost + heuristic(neighbor, goal)
 
-                came_from[neighbor] = (current, direction)
+                    heapq.heappush(open_list, (f_cost, neighbor))
+                    parent[neighbor] = (current, direction)
 
     return None
 
@@ -105,7 +80,6 @@ print("MODEL-BASED AGENT")
 print("-----------------------------")
 
 if path:
-
     print("\nAgent Navigation:")
 
     for i, (position, direction) in enumerate(path):
