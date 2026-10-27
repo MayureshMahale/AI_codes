@@ -1,0 +1,7 @@
+{
+    "markdown.editor.quickSuggestions": false,
+    "editor.suggest.selectionMode": "never",
+    "[python]": {
+        "editor.suggest.selectionMode": "never"
+    }
+}

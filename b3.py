@@ -46,7 +46,7 @@ board = [[0] * n for _ in range(n)]
 if solve(board, 0, n):
     print("\nSolution:")
 
-    for row in board:
+    for row in board: 
         print(" ".join("Q" if cell == 1 else "." for cell in row))
 
 else:
