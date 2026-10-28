@@ -1,54 +1,45 @@
 
-def is_safe(board, row, col, n):
+def water_jug_dfs(cap_a, cap_b, target):
 
-    # Check left side of the row
-    for i in range(col):
-        if board[row][i] == 1:
-            return False
+    stack = [(0, 0, [])]
+    visited = set()
 
-    # Check upper-left diagonal
-    i, j = row - 1, col - 1
-    while i >= 0 and j >= 0:
-        if board[i][j] == 1:
-            return False
-        i -= 1
-        j -= 1
+    while stack:
+        a, b, path = stack.pop()
 
-    # Check lower-left diagonal
-    i, j = row + 1, col - 1
-    while i < n and j >= 0:
-        if board[i][j] == 1:
-            return False
-        i += 1
-        j -= 1
+        if (a, b) in visited:
+            continue
 
-    return True
+        visited.add((a, b))
 
+        if a == target or b == target:
+            return path + [(a, b, "Goal")]
 
-def solve(board, col, n):
+        moves = [
+            ((cap_a, b), "Fill Jug A"),
+            ((a, cap_b), "Fill Jug B"),
+            ((0, b), "Empty Jug A"),
+            ((a, 0), "Empty Jug B"),
+            ((a-min(a, cap_b-b), b+min(a, cap_b-b)), "Pour A -> B"),
+            ((a+min(b, cap_a-a), b-min(b, cap_a-a)), "Pour B -> A")
+        ]
 
-    if col == n:
-        return True
+        for (x, y), op in reversed(moves):
+            if (x, y) not in visited:
+                stack.append((x, y, path + [(a, b, op)]))
 
-    for row in range(n):
-
-        if is_safe(board, row, col, n):
-            board[row][col] = 1
-
-            if solve(board, col + 1, n):
-                return True
-
-            board[row][col] = 0
-
-    return False
+    return None
 
 
-n = int(input("Enter number of queens: "))
-board = [[0] * n for _ in range(n)]
+cap_a = int(input("Enter capacity of Jug A: "))
+cap_b = int(input("Enter capacity of Jug B: "))
+target = int(input("Enter target amount: "))
 
-if solve(board, 0, n):
-    print("\nSolution")
-    for row in board:
-        print(" ".join("Q" if cell == 1 else "." for cell in row))
+solution = water_jug_dfs(cap_a, cap_b, target)
+
+if solution:
+    print("\nDFS Solution:")
+    for i, (a, b, op) in enumerate(solution):
+        print(f"Step {i}: {op} -> ({a}, {b})")
 else:
-    print("No solution exists.")
+    print("\nNo solution possible.")

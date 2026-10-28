@@ -1,6 +1,5 @@
 from collections import deque
 
-
 # BFS function
 def bfs(start, goal):
 
